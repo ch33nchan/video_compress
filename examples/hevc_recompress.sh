@@ -5,8 +5,8 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PD="$(cd "${HERE}/.." && pwd)"
 LIST="${PD}/test_video_names.txt"
 
-if [[ $# -ne 6 ]]; then
-  echo "Usage: $0 <crf> <scale> <in_dir> <jobs> <pools> <num>" >&2
+if [[ $# -ne 5 ]]; then
+  echo "Usage: $0 <crf> <scale> <in_dir> <jobs> <num>" >&2
   exit 2
 fi
 
@@ -14,13 +14,12 @@ CRF="$1"
 SCALE="$2"
 IN_DIR="${3%/}"
 JOBS="$4"
-POOLS="$5"
-NUM="$6"
+NUM="$5"
 
 TMPDIR="$(mktemp -d)"
 OUT_ZIP="$PD/comma2k19_submission.zip"
 
-export CRF IN_DIR TMPDIR SCALE POOLS
+export CRF IN_DIR TMPDIR SCALE
 
 head -n "$NUM" "$LIST" | xargs -n1 -P"$JOBS" -I{} bash -lc '
   rel="$1"
@@ -42,7 +41,7 @@ head -n "$NUM" "$LIST" | xargs -n1 -P"$JOBS" -I{} bash -lc '
     -r 20 -fflags +genpts -i "$IN" \
     ${SCALE_VF} \
     -c:v libx265 -preset fast -crf "$CRF" \
-    -g 1 -bf 0 -x265-params "keyint=1:min-keyint=1:scenecut=0:pools=${POOLS}:frame-threads=1:log-level=warning" \
+    -g 1 -bf 0 -x265-params "keyint=1:min-keyint=1:scenecut=0:frame-threads=1:log-level=warning" \
     -r 20 -f hevc "$OUT"
 ' _ {}
 
