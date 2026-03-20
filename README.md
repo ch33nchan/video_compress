@@ -97,9 +97,11 @@ bash inflate.sh <archive_dir> <output_dir> <video_names_file>
 - `output_dir`: path where inflated frames must be written
 - `video_names_file`: text file listing video paths, one per line
 
-For each line in `video_names_file`, `inflate.sh` must produce a raw video file at `<output_dir>/<segment_id>/video.raw`.
+For each line in `video_names_file`, `inflate.sh` must produce a raw video file at `<output_dir>/<segment_id>/video.raw`. A `.raw` file is a flat binary dump of uint8 RGB frames with shape `(N, H, W, 3)` where N is the number of frames, H and W match the original video dimensions, no header.
 
-See [submissions/baseline/](submissions/baseline/) for a working example.
+Open a Pull Request with your submission and follow the template instructions to be evaluated.
+
+See [submissions/baseline/](submissions/baseline/) or [submissions/baseline_fast/](submissions/baseline_fast/) for working examples.
 
 ### evaluation
 
