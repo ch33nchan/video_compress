@@ -1,21 +1,14 @@
 #!/usr/bin/env python
-import av, torch
+import av, torch, numpy as np
 import torch.nn.functional as F
+from PIL import Image
 from frame_utils import camera_size, yuv420_to_rgb
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-UNSHARP_KERNEL = torch.tensor([
-  [1., 8., 28., 56., 70., 56., 28., 8., 1.],
-  [8., 64., 224., 448., 560., 448., 224., 64., 8.],
-  [28., 224., 784., 1568., 1960., 1568., 784., 224., 28.],
-  [56., 448., 1568., 3136., 3920., 3136., 1568., 448., 56.],
-  [70., 560., 1960., 3920., 4900., 3920., 1960., 560., 70.],
-  [56., 448., 1568., 3136., 3920., 3136., 1568., 448., 56.],
-  [28., 224., 784., 1568., 1960., 1568., 784., 224., 28.],
-  [8., 64., 224., 448., 560., 448., 224., 64., 8.],
-  [1., 8., 28., 56., 70., 56., 28., 8., 1.],
-], dtype=torch.float32, device=DEVICE) / 65536.0
+_r = torch.tensor([1., 8., 28., 56., 70., 56., 28., 8., 1.])
+KERNEL = (torch.outer(_r, _r) / (_r.sum()**2)).to(DEVICE).expand(3, 1, 9, 9)
+STRENGTH = 0.70
 
 
 def decode_and_resize_to_file(video_path: str, dst: str):
@@ -29,11 +22,11 @@ def decode_and_resize_to_file(video_path: str, dst: str):
       t = yuv420_to_rgb(frame)  # (H, W, 3)
       H, W, _ = t.shape
       if H != target_h or W != target_w:
-        x = t.permute(2, 0, 1).unsqueeze(0).float().to(DEVICE)  # (1, C, H, W)
-        x = F.interpolate(x, size=(target_h, target_w), mode='bicubic', align_corners=False)
-        kernel = UNSHARP_KERNEL.expand(3, 1, 9, 9)
-        blur = F.conv2d(F.pad(x, (4, 4, 4, 4), mode='reflect'), kernel, padding=0, groups=3)
-        x = x + 0.70 * (x - blur)
+        pil = Image.fromarray(t.numpy())
+        pil = pil.resize((target_w, target_h), Image.LANCZOS)
+        x = torch.from_numpy(np.array(pil)).permute(2, 0, 1).unsqueeze(0).float().to(DEVICE)
+        blur = F.conv2d(F.pad(x, (4, 4, 4, 4), mode='reflect'), KERNEL, padding=0, groups=3)
+        x = x + STRENGTH * (x - blur)
         t = x.clamp(0, 255).squeeze(0).permute(1, 2, 0).round().cpu().to(torch.uint8)
       f.write(t.contiguous().numpy().tobytes())
       n += 1
