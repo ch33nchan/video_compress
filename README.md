@@ -126,6 +126,7 @@ The official evaluation has a time limit of 30 minutes. If your inflation script
 | damir_bearclaw_002 | 1.98 |https://github.com/commaai/comma_video_compression_challenge/pull/30 |
 | svtav1_cheetah | 2.05 |https://github.com/commaai/comma_video_compression_challenge/pull/24 |
 | svtav1_45pct_unsharp20_direct | 2.07 |https://github.com/commaai/comma_video_compression_challenge/pull/27 |
+| svtav1_gop360_binomial_unsharp | 2.08 |https://github.com/commaai/comma_video_compression_challenge/pull/26 |
 | av1_sharp1_adaptive | 2.08 |https://github.com/commaai/comma_video_compression_challenge/pull/23 |
 | svtav1_45pct_unsharp | 2.09 |https://github.com/commaai/comma_video_compression_challenge/pull/20 |
 | svt_av1_lanczos_fg | 2.20  | https://github.com/commaai/comma_video_compression_challenge/pull/18 |
